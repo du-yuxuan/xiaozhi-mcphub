@@ -74,7 +74,7 @@
     "pgvector": "^0.2.1",
     "postgres": "^3.4.7",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.26",
+    "typeorm": "^1.1.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },
