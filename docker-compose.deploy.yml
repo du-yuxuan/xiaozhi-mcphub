@@ -1,0 +1,42 @@
+# 部署用 docker-compose（使用预构建镜像，无需源码）
+# 用法：docker compose -f docker-compose.deploy.yml up -d
+volumes:
+  pgdata:
+  appdata:
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: xiaozhi
+      POSTGRES_PASSWORD: xiaozhi123456
+      POSTGRES_DB: xiaozhi_mcphub
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xiaozhi -d xiaozhi_mcphub -h 127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mcphub:
+    image: xiaozhi-mcphub:latest
+    container_name: xiaozhi-mcphub
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgres://xiaozhi:xiaozhi123456@db:5432/xiaozhi_mcphub"
+      NODE_ENV: production
+      SMART_ROUTING_ENABLED: "false"
+      # 生产环境建议修改：
+      # JWT_SECRET: "改成你自己的随机字符串"
+    volumes:
+      - appdata:/app/data
